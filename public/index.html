@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My秘書アプリ</title>
+  <style>
+    :root {
+      --bg: #eef1f8;
+      --surface: rgba(255, 255, 255, 0.72);
+      --surface-solid: #ffffff;
+      --border: rgba(20, 30, 70, 0.08);
+      --text: #1c2333;
+      --text-sub: #6b7488;
+      --text-faint: #9aa2b4;
+      --accent: #5b6cff;
+      --accent-2: #8b5cf6;
+      --accent-grad: linear-gradient(135deg, #5b6cff 0%, #8b5cf6 100%);
+      --danger: #ef476f;
+      --shadow-sm: 0 1px 2px rgba(30, 40, 90, 0.06);
+      --shadow-md: 0 10px 30px -12px rgba(40, 50, 110, 0.28);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-font-smoothing: antialiased; }
+    body {
+      font-family: "Hiragino Sans", "Yu Gothic", -apple-system, "Segoe UI", sans-serif;
+      color: var(--text);
+      margin: 0;
+      padding: 40px 20px 64px;
+      background:
+        radial-gradient(1200px 600px at 12% -8%, #dfe6ff 0%, transparent 55%),
+        radial-gradient(1000px 560px at 100% 0%, #f0e2ff 0%, transparent 50%),
+        var(--bg);
+      min-height: 100vh;
+    }
+    .container { max-width: 760px; margin: 0 auto; }
+
+    /* ヘッダー */
+    .app-header { margin-bottom: 28px; }
+    h1 {
+      font-size: 30px; font-weight: 800; letter-spacing: -0.02em;
+      margin: 0; display: flex; align-items: center; gap: 12px;
+    }
+    h1 .logo {
+      width: 44px; height: 44px; border-radius: 13px;
+      background: var(--accent-grad); color: #fff;
+      display: grid; place-items: center; font-size: 22px;
+      box-shadow: 0 8px 20px -6px rgba(91, 108, 255, 0.6);
+    }
+    .subtitle { color: var(--text-sub); font-size: 14px; margin: 8px 0 0 56px; }
+
+    h2 {
+      font-size: 13px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--text-sub);
+      margin: 34px 0 14px; display: flex; align-items: center; gap: 8px;
+    }
+    h2::before {
+      content: ""; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent-grad);
+    }
+
+    /* ダッシュボード */
+    .dashboard { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .card {
+      position: relative; overflow: hidden;
+      background: var(--surface); backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 18px;
+      box-shadow: var(--shadow-md);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .card:hover { transform: translateY(-3px); box-shadow: 0 18px 40px -14px rgba(40,50,110,0.35); }
+    .card::after {
+      content: ""; position: absolute; inset: 0 auto 0 0; width: 4px;
+      background: var(--accent-grad);
+    }
+    .card .num {
+      font-size: 34px; font-weight: 800; line-height: 1; letter-spacing: -0.02em;
+      background: var(--accent-grad); -webkit-background-clip: text;
+      background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .card .label { font-size: 12.5px; color: var(--text-sub); margin-top: 8px; font-weight: 600; }
+
+    /* パネル（入力欄） */
+    .panel {
+      background: var(--surface); backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow-md);
+    }
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.85);
+      border-radius: 12px;
+      font-size: 14.5px;
+      margin-bottom: 10px;
+      font-family: inherit;
+      color: var(--text);
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+    input[type="text"]::placeholder, textarea::placeholder { color: var(--text-faint); }
+    input[type="text"]:focus, textarea:focus {
+      outline: none; border-color: var(--accent); background: #fff;
+      box-shadow: 0 0 0 4px rgba(91, 108, 255, 0.14);
+    }
+    textarea { min-height: 84px; resize: vertical; }
+
+    button {
+      cursor: pointer; border: none;
+      border-radius: 11px;
+      font-size: 13.5px; font-weight: 600;
+      padding: 9px 16px;
+      font-family: inherit;
+      transition: transform 0.12s ease, box-shadow 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+    }
+    button:active { transform: translateY(1px); }
+    .btn-primary {
+      background: var(--accent-grad); color: #fff;
+      box-shadow: 0 8px 18px -8px rgba(91, 108, 255, 0.7);
+    }
+    .btn-primary:hover { box-shadow: 0 10px 22px -6px rgba(91, 108, 255, 0.8); opacity: 0.95; }
+
+    /* 一覧 */
+    ul { list-style: none; padding: 0; margin: 14px 0 0; }
+    li {
+      background: var(--surface-solid);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      animation: rise 0.3s ease both;
+    }
+    li:hover { transform: translateY(-2px); box-shadow: 0 12px 26px -14px rgba(40,50,110,0.3); border-color: rgba(91,108,255,0.25); }
+    @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+    .memo-title { font-weight: 700; font-size: 15.5px; margin-bottom: 5px; }
+    .memo-body { white-space: pre-wrap; color: #4b5468; font-size: 14px; line-height: 1.65; }
+    .meta {
+      font-size: 12px; color: var(--text-faint); margin-top: 12px;
+      display: flex; align-items: center; gap: 8px;
+      padding-top: 10px; border-top: 1px solid var(--border);
+    }
+    .empty {
+      color: var(--text-faint); font-size: 14px; text-align: center;
+      padding: 28px; border: 1.5px dashed var(--border); border-radius: 14px;
+    }
+
+    .task-row { display: flex; align-items: center; gap: 12px; }
+    .task-row input[type="checkbox"] {
+      width: 20px; height: 20px; flex: none; margin: 0;
+      accent-color: var(--accent); cursor: pointer;
+    }
+    .task-title { flex: 1; font-size: 14.5px; font-weight: 500; }
+    .task-done .task-title { text-decoration: line-through; color: var(--text-faint); font-weight: 400; }
+    .badge {
+      font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px;
+      background: #fff2d6; color: #b57e00; letter-spacing: 0.02em;
+    }
+    .badge.done { background: #d9f7e3; color: #12855a; }
+
+    /* アクションボタン */
+    .btn-del, .btn-edit {
+      padding: 6px 12px; font-size: 12.5px;
+      background: rgba(20,30,70,0.05); color: var(--text-sub);
+    }
+    .btn-del:hover { background: rgba(239,71,111,0.12); color: var(--danger); }
+    .btn-edit { color: var(--accent); margin-right: 2px; }
+    .btn-edit:hover { background: rgba(91,108,255,0.12); }
+    .meta .actions { margin-left: auto; display: flex; gap: 6px; }
+
+    /* ダッシュボード：最新の振り返り */
+    .review-highlight {
+      margin-top: 14px;
+      background: linear-gradient(135deg, rgba(91,108,255,0.10), rgba(139,92,246,0.10));
+      border: 1px solid rgba(91,108,255,0.22);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-sm);
+    }
+    .rh-label {
+      font-size: 12.5px; font-weight: 700; color: var(--accent);
+      display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+    }
+    .rh-week {
+      font-size: 11.5px; font-weight: 600; color: var(--accent-2);
+      background: rgba(139,92,246,0.14); padding: 2px 9px; border-radius: 999px;
+    }
+    .rh-body { font-size: 14px; line-height: 1.6; color: var(--text); white-space: pre-wrap; }
+    .rh-empty { color: var(--text-faint); }
+
+    /* 振り返り 入力・一覧 */
+    .field-label {
+      display: block; font-size: 12px; font-weight: 700; color: var(--text-sub);
+      margin-bottom: 6px;
+    }
+    .week-picker { display: flex; gap: 8px; margin-bottom: 10px; }
+    .week-picker select {
+      flex: 1; padding: 11px 12px;
+      border: 1px solid var(--border); background: rgba(255,255,255,0.85);
+      border-radius: 12px; font-size: 14.5px; font-family: inherit; color: var(--text);
+      cursor: pointer;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+    .week-picker select:focus {
+      outline: none; border-color: var(--accent); background: #fff;
+      box-shadow: 0 0 0 4px rgba(91,108,255,0.14);
+    }
+    .review-week {
+      font-weight: 700; font-size: 14.5px; color: var(--accent);
+      margin-bottom: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="app-header">
+      <h1><span class="logo">🗒️</span>My秘書アプリ</h1>
+      <p class="subtitle">メモとタスクを、ひとつの場所でスマートに管理</p>
+    </header>
+
+    <!-- ダッシュボード -->
+    <div class="dashboard">
+      <div class="card"><div class="num" id="stat-memos">0</div><div class="label">メモ件数</div></div>
+      <div class="card"><div class="num" id="stat-tasks">0</div><div class="label">タスク件数</div></div>
+      <div class="card"><div class="num" id="stat-undone">0</div><div class="label">未完了タスク</div></div>
+    </div>
+
+    <!-- ダッシュボード：最新の振り返り -->
+    <div class="review-highlight" id="latest-review">
+      <div class="rh-label">📌 最新の振り返り</div>
+      <div class="rh-body">まだ振り返りがありません</div>
+    </div>
+
+    <!-- メモ追加欄 -->
+    <h2>メモを追加</h2>
+    <div class="panel">
+      <input type="text" id="memo-title" placeholder="タイトル" />
+      <textarea id="memo-content" placeholder="本文"></textarea>
+      <button class="btn-primary" onclick="addMemo()">メモを追加</button>
+    </div>
+
+    <!-- メモ一覧 -->
+    <h2>メモ一覧</h2>
+    <ul id="memo-list"></ul>
+
+    <!-- タスク追加欄 -->
+    <h2>タスクを追加</h2>
+    <div class="panel">
+      <input type="text" id="task-title" placeholder="タスク内容" onkeydown="if(event.key==='Enter'&&!event.isComposing)addTask()" />
+      <button class="btn-primary" onclick="addTask()">タスクを追加</button>
+    </div>
+
+    <!-- タスク一覧 -->
+    <h2>タスク一覧</h2>
+    <ul id="task-list"></ul>
+
+    <!-- 週次振り返り 記録欄 -->
+    <h2>週次の振り返り</h2>
+    <div class="panel">
+      <label class="field-label">対象週</label>
+      <div class="week-picker">
+        <select id="review-year"></select>
+        <select id="review-month"></select>
+        <select id="review-weekno"></select>
+      </div>
+      <textarea id="review-comment" placeholder="今週の振り返りを記録しましょう（できたこと・課題・来週やること など）"></textarea>
+      <button class="btn-primary" onclick="addReview()">振り返りを記録</button>
+    </div>
+
+    <!-- 週次振り返り 一覧 -->
+    <h2>振り返りの記録</h2>
+    <ul id="review-list"></ul>
+  </div>
+
+  <script>
+    // 日時を読みやすく整形
+    function fmt(iso) {
+      const d = new Date(iso);
+      const p = (n) => String(n).padStart(2, '0');
+      return `${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+    }
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, (c) => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+      ));
+    }
+
+    let memos = [];
+    let tasks = [];
+    let reviews = [];
+    let editingMemoId = null; // 編集中のメモID（nullなら通常表示）
+    let editingTaskId = null; // 編集中のタスクID
+
+    // その日が「その月の何週目」かを求める（1〜7日=1週目, 8〜14日=2週目 …）
+    function weekOfMonth(date) {
+      return Math.ceil(date.getDate() / 7);
+    }
+
+    // 年・月・週番号から保存キーを作る（例: "2026-06-1"＝2026年6月1週目）
+    // 月は2桁ゼロ埋めして、文字列のまま並べ替えても正しい順序になるようにする
+    function makeWeekKey(year, month, weekno) {
+      return `${year}-${String(month).padStart(2, '0')}-${weekno}`;
+    }
+
+    // "2026-06-1" を「2026年6月1週目」の表記に変換
+    function weekLabel(week) {
+      const m = /^(\d{4})-(\d{2})-(\d)$/.exec(week);
+      if (!m) return week;
+      return `${+m[1]}年${+m[2]}月${+m[3]}週目`;
+    }
+
+    // 全データを取得して画面を更新
+    async function refresh() {
+      memos = await (await fetch('/api/memos')).json();
+      tasks = await (await fetch('/api/tasks')).json();
+      reviews = await (await fetch('/api/reviews')).json();
+      renderMemos();
+      renderTasks();
+      renderReviews();
+      renderDashboard();
+    }
+
+    function renderDashboard() {
+      document.getElementById('stat-memos').textContent = memos.length;
+      document.getElementById('stat-tasks').textContent = tasks.length;
+      document.getElementById('stat-undone').textContent = tasks.filter(t => !t.done).length;
+
+      // 最新の振り返り（対象週が最も新しいもの）を表示
+      const box = document.getElementById('latest-review');
+      if (reviews.length === 0) {
+        box.querySelector('.rh-body').innerHTML = '<span class="rh-empty">まだ振り返りがありません</span>';
+        box.querySelector('.rh-label').innerHTML = '📌 最新の振り返り';
+        return;
+      }
+      const latest = reviews[0]; // APIが対象週の新しい順で返す
+      box.querySelector('.rh-label').innerHTML = `📌 最新の振り返り <span class="rh-week">${weekLabel(latest.week)}</span>`;
+      box.querySelector('.rh-body').textContent = latest.comment;
+    }
+
+    function renderMemos() {
+      const ul = document.getElementById('memo-list');
+      if (memos.length === 0) {
+        ul.innerHTML = '<div class="empty">まだメモがありません</div>';
+        return;
+      }
+      ul.innerHTML = memos.map(m => {
+        // 編集中ならフォーム、それ以外は通常表示
+        if (m.id === editingMemoId) {
+          return `
+        <li>
+          <input type="text" id="edit-memo-title-${m.id}" value="${escapeHtml(m.title)}" />
+          <textarea id="edit-memo-content-${m.id}">${escapeHtml(m.content)}</textarea>
+          <button class="btn-primary" onclick="saveMemo('${m.id}')">保存</button>
+          <button class="btn-del" onclick="cancelEditMemo()">キャンセル</button>
+        </li>`;
+        }
+        return `
+        <li>
+          <div class="memo-title">${escapeHtml(m.title) || '(無題)'}</div>
+          <div class="memo-body">${escapeHtml(m.content)}</div>
+          <div class="meta">🕒 ${fmt(m.createdAt)}${m.updatedAt ? '・編集 ' + fmt(m.updatedAt) : ''}
+            <span class="actions">
+              <button class="btn-edit" onclick="editMemo('${m.id}')">編集</button>
+              <button class="btn-del" onclick="delMemo('${m.id}')">削除</button>
+            </span>
+          </div>
+        </li>`;
+      }).join('');
+    }
+
+    function renderTasks() {
+      const ul = document.getElementById('task-list');
+      if (tasks.length === 0) {
+        ul.innerHTML = '<div class="empty">まだタスクがありません</div>';
+        return;
+      }
+      ul.innerHTML = tasks.map(t => {
+        // 編集中ならフォーム表示
+        if (t.id === editingTaskId) {
+          return `
+        <li>
+          <div class="task-row">
+            <input type="text" class="task-title" id="edit-task-title-${t.id}" value="${escapeHtml(t.title)}"
+              onkeydown="if(event.key==='Enter'&&!event.isComposing)saveTask('${t.id}')" />
+            <button class="btn-primary" onclick="saveTask('${t.id}')">保存</button>
+            <button class="btn-del" onclick="cancelEditTask()">キャンセル</button>
+          </div>
+        </li>`;
+        }
+        return `
+        <li class="${t.done ? 'task-done' : ''}">
+          <div class="task-row">
+            <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask('${t.id}')" />
+            <span class="task-title">${escapeHtml(t.title)}</span>
+            <span class="badge ${t.done ? 'done' : ''}">${t.done ? '完了' : '未完了'}</span>
+            <button class="btn-edit" onclick="editTask('${t.id}')">編集</button>
+            <button class="btn-del" onclick="delTask('${t.id}')">削除</button>
+          </div>
+          <div class="meta">🕒 ${fmt(t.createdAt)}${t.updatedAt ? '・編集 ' + fmt(t.updatedAt) : ''}</div>
+        </li>`;
+      }).join('');
+    }
+
+    async function addMemo() {
+      const title = document.getElementById('memo-title').value;
+      const content = document.getElementById('memo-content').value;
+      const res = await fetch('/api/memos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, content }),
+      });
+      if (!res.ok) { alert((await res.json()).error); return; }
+      document.getElementById('memo-title').value = '';
+      document.getElementById('memo-content').value = '';
+      refresh();
+    }
+
+    // メモを編集モードにする
+    function editMemo(id) {
+      editingMemoId = id;
+      renderMemos();
+    }
+    function cancelEditMemo() {
+      editingMemoId = null;
+      renderMemos();
+    }
+    async function saveMemo(id) {
+      const title = document.getElementById('edit-memo-title-' + id).value;
+      const content = document.getElementById('edit-memo-content-' + id).value;
+      const res = await fetch('/api/memos/' + id, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, content }),
+      });
+      if (!res.ok) { alert((await res.json()).error); return; }
+      editingMemoId = null;
+      refresh();
+    }
+
+    async function delMemo(id) {
+      if (!confirm('このメモを削除しますか？')) return;
+      await fetch('/api/memos/' + id, { method: 'DELETE' });
+      refresh();
+    }
+
+    async function addTask() {
+      const title = document.getElementById('task-title').value;
+      const res = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title }),
+      });
+      if (!res.ok) { alert((await res.json()).error); return; }
+      document.getElementById('task-title').value = '';
+      refresh();
+    }
+
+    async function toggleTask(id) {
+      await fetch('/api/tasks/' + id, { method: 'PATCH' });
+      refresh();
+    }
+
+    // タスクを編集モードにする
+    function editTask(id) {
+      editingTaskId = id;
+      renderTasks();
+    }
+    function cancelEditTask() {
+      editingTaskId = null;
+      renderTasks();
+    }
+    async function saveTask(id) {
+      const title = document.getElementById('edit-task-title-' + id).value;
+      const res = await fetch('/api/tasks/' + id, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title }),
+      });
+      if (!res.ok) { alert((await res.json()).error); return; }
+      editingTaskId = null;
+      refresh();
+    }
+
+    async function delTask(id) {
+      if (!confirm('このタスクを削除しますか？')) return;
+      await fetch('/api/tasks/' + id, { method: 'DELETE' });
+      refresh();
+    }
+
+    // ---- 週次振り返り ----
+    function renderReviews() {
+      const ul = document.getElementById('review-list');
+      if (reviews.length === 0) {
+        ul.innerHTML = '<div class="empty">まだ振り返りがありません</div>';
+        return;
+      }
+      ul.innerHTML = reviews.map(r => `
+        <li class="review-item">
+          <div class="review-week">🗓️ ${weekLabel(r.week)}</div>
+          <div class="memo-body">${escapeHtml(r.comment)}</div>
+          <div class="meta">🕒 ${fmt(r.createdAt)}${r.updatedAt ? '・更新 ' + fmt(r.updatedAt) : ''}
+            <span class="actions">
+              <button class="btn-del" onclick="delReview('${r.id}')">削除</button>
+            </span>
+          </div>
+        </li>`).join('');
+    }
+
+    async function addReview() {
+      const year = document.getElementById('review-year').value;
+      const month = document.getElementById('review-month').value;
+      const weekno = document.getElementById('review-weekno').value;
+      const week = makeWeekKey(year, month, weekno);
+      const comment = document.getElementById('review-comment').value;
+      const res = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ week, comment }),
+      });
+      if (!res.ok) { alert((await res.json()).error); return; }
+      document.getElementById('review-comment').value = '';
+      refresh();
+    }
+
+    // 対象週の選択肢を用意して、初期値を「今週」にセット
+    function setupWeekPicker() {
+      const now = new Date();
+      const ySel = document.getElementById('review-year');
+      const mSel = document.getElementById('review-month');
+      const wSel = document.getElementById('review-weekno');
+      const y = now.getFullYear();
+      for (let yr = y - 1; yr <= y + 1; yr++) {
+        ySel.insertAdjacentHTML('beforeend', `<option value="${yr}">${yr}年</option>`);
+      }
+      for (let mo = 1; mo <= 12; mo++) {
+        mSel.insertAdjacentHTML('beforeend', `<option value="${mo}">${mo}月</option>`);
+      }
+      for (let wk = 1; wk <= 5; wk++) {
+        wSel.insertAdjacentHTML('beforeend', `<option value="${wk}">${wk}週目</option>`);
+      }
+      ySel.value = y;
+      mSel.value = now.getMonth() + 1;
+      wSel.value = weekOfMonth(now);
+    }
+
+    async function delReview(id) {
+      if (!confirm('この振り返りを削除しますか？')) return;
+      await fetch('/api/reviews/' + id, { method: 'DELETE' });
+      refresh();
+    }
+
+    setupWeekPicker();
+    refresh();
+  </script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+# macOSが自動生成する不要ファイル
+.DS_Store
+
+# Node.jsの依存フォルダ（今回は未使用だが念のため）
+node_modules/
